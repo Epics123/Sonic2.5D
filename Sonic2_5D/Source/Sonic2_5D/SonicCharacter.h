@@ -17,7 +17,10 @@ class SONIC2_5D_API ASonicCharacter : public APaperCharacter
 	GENERATED_BODY()
 
 public:
-	ASonicCharacter();
+	ASonicCharacter(const FObjectInitializer& ObjectInitializer);
+
+	void UpdateAnimations();
+	void UpdateSpriteRotation(float speed);
 
 protected:
 	/** Called for side to side input */
@@ -44,4 +47,27 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USpringArmComponent* CameraBoom;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<FString, class UPaperFlipbook*> Animations;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPaperFlipbookComponent* PlayerSprite;
+
+	class USonicMovementComponent* MovementComponent;
+
+private:
+	float GroundSpeed = 0.0f;
+	float Acc = 1.40625f;//0.046875f;
+	float Dec = 15.0f;//0.5f;
+	float Frc = 1.40625f;//0.046875;
+	float TopSpeed = 600.0f;//6.0f;
+	float SlopeFactor = 0.125f;
+	float SlopeRollUp = 0.078125f;
+	float SlopeRollDown = 0.3125f;
+	float Fall = 2.5f; // tolerance ground speed for sticking to walls and ceilings
+
+	float AirAcc = 0.09375f;
+	float JumpForce = 6.5f;
+	float Grv = 0.21875;
 };
