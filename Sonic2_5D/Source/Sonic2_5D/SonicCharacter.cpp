@@ -34,22 +34,33 @@ void ASonicCharacter::UpdateAnimations()
 		NextAnim = *Animations.Find("Idle");
 		if(NextAnim)
 			PlayerSprite->SetFlipbook(NextAnim);
+		PlayerSprite->SetPlayRate(1.0f);
 	}
-	if (FMath::Abs(GroundSpeed) > 0.0f && FMath::Abs(GroundSpeed) < TopSpeed)
+	if (FMath::Abs(GroundSpeed) > 0.0f && FMath::Abs(GroundSpeed) < TopSpeed && !Skidding)
 	{
 		NextAnim = *Animations.Find("Jog");
 		if (NextAnim)
 			PlayerSprite->SetFlipbook(NextAnim);
 		
 		UpdateSpriteRotation(GroundSpeed);
+		PlayerSprite->SetPlayRate((FMath::Abs(GroundSpeed) / TopSpeed) + 0.1f);
+		
 	}
-	if (FMath::Abs(GroundSpeed) == TopSpeed)
+	if (FMath::Abs(GroundSpeed) >= TopSpeed && !Skidding)
 	{
 		NextAnim = *Animations.Find("Run");
 		if (NextAnim)
 			PlayerSprite->SetFlipbook(NextAnim);
 
 		UpdateSpriteRotation(GroundSpeed);
+	}
+	if (Skidding)
+	{
+		NextAnim = *Animations.Find("Skid");
+		if (NextAnim)
+			PlayerSprite->SetFlipbook(NextAnim);
+
+		//UpdateSpriteRotation(GroundSpeed);
 	}
 }
 
@@ -77,6 +88,8 @@ void ASonicCharacter::MoveRight(float Value)
 			// Are we moving to the right already?
 			if (GroundSpeed > 0)
 			{
+				if(GroundSpeed >= 400.0f)
+					Skidding = true;
 				GroundSpeed -= Dec;
 				if(GroundSpeed <= 0)
 					GroundSpeed = -0.5f;
@@ -84,6 +97,7 @@ void ASonicCharacter::MoveRight(float Value)
 			// Are we moving left?
 			else if (GroundSpeed > -TopSpeed)
 			{
+				Skidding = false;
 				GroundSpeed -= Acc;
 				if(GroundSpeed <= -TopSpeed)
 					GroundSpeed = -TopSpeed;
@@ -101,6 +115,8 @@ void ASonicCharacter::MoveRight(float Value)
 			// Are we moving to the left already?
 			if (GroundSpeed < 0)
 			{
+				if (GroundSpeed <= -400.0f)
+					Skidding = true;
 				GroundSpeed += Dec;
 				if (GroundSpeed >= 0)
 					GroundSpeed = 0.5f;
@@ -108,6 +124,7 @@ void ASonicCharacter::MoveRight(float Value)
 			// Are we moving right?
 			else if (GroundSpeed < TopSpeed)
 			{
+				Skidding = false;
 				GroundSpeed += Acc;
 				if (GroundSpeed >= TopSpeed)
 					GroundSpeed = TopSpeed;
@@ -121,6 +138,7 @@ void ASonicCharacter::MoveRight(float Value)
 		
 		if (Value == 0.0f)
 		{
+			Skidding = false;
 			GroundSpeed -= fmin(fabs(GroundSpeed), Frc) * FMath::Sign(GroundSpeed);
 			
 			FVector CurrentLocation = GetActorLocation();
@@ -161,6 +179,6 @@ void ASonicCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), GroundSpeed));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), GroundSpeed));
 	UpdateAnimations();
 }

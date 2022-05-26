@@ -70,4 +70,6 @@ private:
 	float AirAcc = 0.09375f;
 	float JumpForce = 6.5f;
 	float Grv = 0.21875;
+
+	bool Skidding = false;
 };
